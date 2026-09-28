@@ -1,0 +1,43 @@
+name: Channel
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    name: Post
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post to the Telegram channel that the bot was given
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ vars.TELEGRAM_CHANNEL }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$CHAT" ]; then
+            echo "Set the TELEGRAM_BOT_TOKEN secret, and a channel with /setchannel in the bot, to post."
+            exit 0
+          fi
+          send() {
+            curl -sS --fail-with-body -o /dev/null "https://api.telegram.org/bot$TOKEN/sendMessage" \
+              --data-urlencode "chat_id=$CHAT" --data-urlencode "text=$1" \
+              --data-urlencode "parse_mode=HTML" --data-urlencode 'link_preview_options={"is_disabled":true}'
+          }
+          module="github.com/$GITHUB_REPOSITORY"
+          case "$GITHUB_REF" in
+            refs/tags/*)
+              tag="${GITHUB_REF#refs/tags/}"
+              send "$(printf '<b>TeleIQ %s is out</b>\n\n<code>go get %s@%s</code>\n\n<a href="https://%s/releases/tag/%s">Release</a> · <a href="https://pkg.go.dev/%s@%s">Documentation</a>' "$tag" "$module" "$tag" "$module" "$tag" "$module" "$tag")"
+              ;;
+            *)
+              # A rewritten history posts its latest commit only; a longer push, its last five.
+              jq -c '(if .forced then [.head_commit] else .commits end) | map(select(. != null)) | .[-5:] | .[]' "$GITHUB_EVENT_PATH" |
+              while read -r commit; do
+                send "$(jq -r '"<b>New commit in TeleIQ</b>\n\n" + (.message | split("\n")[0] | @html) + "\n\n<a href=\"" + (.url | @html) + "\">" + .id[0:7] + "</a> · " + (.author.name | @html)' <<< "$commit")"
+              done
+              ;;
+          esac

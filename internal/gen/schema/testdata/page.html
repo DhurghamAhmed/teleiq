@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bot API test page</title>
+<style>p > a { color: red; }</style>
+<script>if (a < b && c > d) { document.write("<h4>fakeMethod</h4>"); }</script>
+</head>
+<body>
+<!-- a comment holding <h4>FakeType</h4> -->
+<h3><a class="anchor" name="recent-changes" href="#recent-changes"><i class="anchor-icon"></i></a>Recent changes</h3>
+<h4><a class="anchor" name="march-1-2026" href="#march-1-2026"><i class="anchor-icon"></i></a>March 1, 2026</h4>
+<p><strong>Bot API 9.5</strong></p>
+<ul><li>Added the method <a href="#getme">getMe</a>.</li></ul>
+<h4>February 1, 2026</h4>
+<p><strong>Bot API 9.4</strong></p>
+
+<h3>Getting updates</h3>
+<h4><a class="anchor" name="getupdates" href="#getupdates"><i class="anchor-icon"></i></a>getUpdates</h4>
+<p>Use this method to receive incoming updates. Returns an Array of <a href="#update">Update</a> objects.</p>
+<h4><a class="anchor" name="update" href="#update"><i class="anchor-icon"></i></a>Update</h4>
+<p>This <a href="#available-types">object</a> represents an incoming update.<br>At most one of the optional fields can be present in any given update.</p>
+<table class="table">
+<thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>update_id</td><td>Integer</td><td>The update&#39;s unique identifier.</td></tr>
+<tr><td>message</td><td><a href="#message">Message</a></td><td><em>Optional</em>. New incoming message.</td></tr>
+</tbody>
+</table>
+
+<h3>Available types</h3>
+<h4>User</h4>
+<p>This object represents a Telegram user or bot.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>id</td><td>Integer</td><td>Unique identifier for this user or bot.</td></tr>
+<tr><td>is_premium</td><td>True</td><td><em>Optional</em>. <em>True</em>, if this user is a Telegram Premium user</td></tr>
+</table>
+<h4>Message</h4>
+<p>This object represents a message.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>message_id</td><td>Integer</td><td>Unique message identifier</td></tr>
+<tr><td>entities</td><td>Array of <a href="#messageentity">MessageEntity</a></td><td><em>Optional</em>. Special entities in the text</td></tr>
+</table>
+<h4>MessageEntity</h4>
+<p>This object represents one special entity in a text message.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>type</td><td>String</td><td>Type of the entity</td></tr>
+</table>
+<h4>MessageOrigin</h4>
+<p>This object describes the origin of a message. It can be one of</p>
+<ul>
+<li><a href="#messageoriginuser">MessageOriginUser</a></li>
+<li><a href="#messageoriginchat">MessageOriginChat</a></li>
+</ul>
+<h4>MessageOriginUser</h4>
+<p>The message was originally sent by a known user.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>type</td><td>String</td><td>Type of the message origin, always “user”</td></tr>
+<tr><td>sender_user</td><td><a href="#user">User</a></td><td>User that sent the message originally</td></tr>
+</table>
+<h4>MessageOriginChat</h4>
+<p>The message was originally sent on behalf of a chat.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>type</td><td>String</td><td>Type of the message origin, must be chat</td></tr>
+</table>
+<h4>RichText</h4>
+<p>This object represents a rich formatted text. Currently, it can be either a String for plain text, an Array of <a href="#richtext">RichText</a>, or any of the following types:</p>
+<ul><li><a href="#richtextbold">RichTextBold</a></li></ul>
+<h4>RichTextBold</h4>
+<p>A bold rich text.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>type</td><td>String</td><td>Type of the rich text, always “bold”</td></tr>
+<tr><td>text</td><td><a href="#richtext">RichText</a></td><td>The text</td></tr>
+</table>
+<h4>InputMessageContent</h4>
+<p>This object represents the content of a message to be sent. It can be one of</p>
+<ul><li><a href="#inputtextmessagecontent">InputTextMessageContent</a></li></ul>
+<h4>InputTextMessageContent</h4>
+<p>Represents the content of a text message.</p>
+<table class="table">
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td>message_text</td><td>String</td><td>Text of the message to be sent, 1-4096 characters</td></tr>
+</table>
+<h4>CallbackGame</h4>
+<p>A placeholder, currently holds no information.</p>
+<h4>InputFile</h4>
+<p>This object represents the contents of a file to be uploaded.</p>
+<h4>Sending files</h4>
+<p>There are three ways to send files.</p>
+
+<h3>Available methods</h3>
+<h4>getMe</h4>
+<p>A simple method for testing your bot&#39;s authentication token. Requires no parameters. Returns basic information about the bot in form of a <a href="#user">User</a> object.</p>
+<h4>sendMessage</h4>
+<p>Use this method to send text messages. On success, the sent <a href="#message">Message</a> is returned.</p>
+<table class="table">
+<tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td>chat_id</td><td>Integer or String</td><td>Yes</td><td>Unique identifier for the target chat</td></tr>
+<tr><td>photos</td><td>Array of <a href="#inputfile">InputFile</a>, String and Integer</td><td>Optional</td><td>A list</td></tr>
+<tr><td>entities</td><td>Array of <a href="#messageentity">MessageEntity</a></td><td>Optional</td><td>Special entities</td></tr>
+</table>
+<h4>editMessageText</h4>
+<p>Use this method to edit text messages. On success, if the edited message is not an inline message, the edited <a href="#message">Message</a> is returned, otherwise <em>True</em> is returned.</p>
+<h4>getChatMemberCount</h4>
+<p>Use this method to get the number of members in a chat. Returns <em>Int</em> on success.</p>
+</body>
+</html>

@@ -1,0 +1,86 @@
+name: Bot API update
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bot-api-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    env:
+      BRANCH: bot-api-update
+    steps:
+      - uses: actions/checkout@v7
+
+      # Latest stable Go, not the minimum version in go.mod.
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: Skip while an update waits for review
+        id: open
+        run: |
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            echo "The branch $BRANCH already exists; review its pull request first."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update to the latest Bot API
+        id: update
+        if: steps.open.outputs.skip != 'true'
+        run: |
+          go run ./internal/gen/update | tee "$RUNNER_TEMP/update.txt"
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Test the updated library
+        id: test
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          if go vet ./... > "$RUNNER_TEMP/test.txt" 2>&1 && go test ./... >> "$RUNNER_TEMP/test.txt" 2>&1; then
+            echo "result=pass" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=fail" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a pull request
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ steps.test.outputs.result }}
+        run: |
+          version="$(sed -n 's/.*SupportedBotAPIVersion = "\(.*\)"/\1/p' version.gen.go)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add -A
+          git commit -m "Update to Bot API $version"
+          git push origin "$BRANCH"
+          {
+            echo "The daily check found changes in the Bot API documentation."
+            echo
+            echo "go vet and go test: **$RESULT**"
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/update.txt"
+            echo '```'
+            echo
+            echo "<details><summary>Test output</summary>"
+            echo
+            echo '```'
+            tail -n 100 "$RUNNER_TEMP/test.txt"
+            echo '```'
+            echo "</details>"
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base main --head "$BRANCH" --title "Update to Bot API $version" --body-file "$RUNNER_TEMP/body.md"

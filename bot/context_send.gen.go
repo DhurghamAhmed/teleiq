@@ -9,94 +9,24 @@ import (
 	"github.com/DhurghamAhmed/teleiq/models"
 )
 
-// SendMessage calls Client.SendMessage with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendMessage(ctx context.Context, p teleiq.SendMessageParams) (*models.Message, error) {
-	if err := c.fillDestination("SendMessage", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
+// SendWidget calls Client.SendWidget with p.ChatID set to the chat of the update. Like Reply, it
+// answers in the same forum topic as the message of the update, unless p sets it. It fails when the
+// update has no chat.
+func (c *Context) SendWidget(ctx context.Context, p teleiq.SendWidgetParams) (*models.Message, error) {
+	if err := c.fillDestination("SendWidget", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID}); err != nil {
 		return nil, err
 	}
-	return c.bot.client.SendMessage(ctx, p)
+	return c.bot.client.SendWidget(ctx, p)
 }
 
-// SendPhoto calls Client.SendPhoto with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendPhoto(ctx context.Context, p teleiq.SendPhotoParams) (*models.Message, error) {
-	if err := c.fillDestination("SendPhoto", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
+// SendSharedWidget calls Client.SendSharedWidget with p.ChatID set to the chat of the update. Like
+// Reply, it answers in the same forum topic as the message of the update, unless p sets it. It
+// fails when the update has no chat.
+func (c *Context) SendSharedWidget(ctx context.Context, p teleiq.SendSharedWidgetParams) (*models.Message, error) {
+	if err := c.fillDestination("SendSharedWidget", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID}); err != nil {
 		return nil, err
 	}
-	return c.bot.client.SendPhoto(ctx, p)
-}
-
-// SendLivePhoto calls Client.SendLivePhoto with p.ChatID set to the chat of the update. Like Reply,
-// it answers in the same forum topic, business connection or direct messages topic as the message
-// of the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendLivePhoto(ctx context.Context, p teleiq.SendLivePhotoParams) (*models.Message, error) {
-	if err := c.fillDestination("SendLivePhoto", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendLivePhoto(ctx, p)
-}
-
-// SendAudio calls Client.SendAudio with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendAudio(ctx context.Context, p teleiq.SendAudioParams) (*models.Message, error) {
-	if err := c.fillDestination("SendAudio", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendAudio(ctx, p)
-}
-
-// SendDocument calls Client.SendDocument with p.ChatID set to the chat of the update. Like Reply,
-// it answers in the same forum topic, business connection or direct messages topic as the message
-// of the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendDocument(ctx context.Context, p teleiq.SendDocumentParams) (*models.Message, error) {
-	if err := c.fillDestination("SendDocument", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendDocument(ctx, p)
-}
-
-// SendVideo calls Client.SendVideo with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendVideo(ctx context.Context, p teleiq.SendVideoParams) (*models.Message, error) {
-	if err := c.fillDestination("SendVideo", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendVideo(ctx, p)
-}
-
-// SendAnimation calls Client.SendAnimation with p.ChatID set to the chat of the update. Like Reply,
-// it answers in the same forum topic, business connection or direct messages topic as the message
-// of the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendAnimation(ctx context.Context, p teleiq.SendAnimationParams) (*models.Message, error) {
-	if err := c.fillDestination("SendAnimation", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendAnimation(ctx, p)
-}
-
-// SendVoice calls Client.SendVoice with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendVoice(ctx context.Context, p teleiq.SendVoiceParams) (*models.Message, error) {
-	if err := c.fillDestination("SendVoice", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendVoice(ctx, p)
-}
-
-// SendVideoNote calls Client.SendVideoNote with p.ChatID set to the chat of the update. Like Reply,
-// it answers in the same forum topic, business connection or direct messages topic as the message
-// of the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendVideoNote(ctx context.Context, p teleiq.SendVideoNoteParams) (*models.Message, error) {
-	if err := c.fillDestination("SendVideoNote", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendVideoNote(ctx, p)
+	return c.bot.client.SendSharedWidget(ctx, p)
 }
 
 // SendPaidMedia calls Client.SendPaidMedia with p.ChatID set to the chat of the update. Like Reply,
@@ -117,36 +47,6 @@ func (c *Context) SendMediaGroup(ctx context.Context, p teleiq.SendMediaGroupPar
 		return nil, err
 	}
 	return c.bot.client.SendMediaGroup(ctx, p)
-}
-
-// SendLocation calls Client.SendLocation with p.ChatID set to the chat of the update. Like Reply,
-// it answers in the same forum topic, business connection or direct messages topic as the message
-// of the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendLocation(ctx context.Context, p teleiq.SendLocationParams) (*models.Message, error) {
-	if err := c.fillDestination("SendLocation", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendLocation(ctx, p)
-}
-
-// SendVenue calls Client.SendVenue with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendVenue(ctx context.Context, p teleiq.SendVenueParams) (*models.Message, error) {
-	if err := c.fillDestination("SendVenue", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendVenue(ctx, p)
-}
-
-// SendContact calls Client.SendContact with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendContact(ctx context.Context, p teleiq.SendContactParams) (*models.Message, error) {
-	if err := c.fillDestination("SendContact", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendContact(ctx, p)
 }
 
 // SendPoll calls Client.SendPoll with p.ChatID set to the chat of the update. Like Reply, it
@@ -187,26 +87,6 @@ func (c *Context) SendChatAction(ctx context.Context, p teleiq.SendChatActionPar
 		return err
 	}
 	return c.bot.client.SendChatAction(ctx, p)
-}
-
-// SendSticker calls Client.SendSticker with p.ChatID set to the chat of the update. Like Reply, it
-// answers in the same forum topic, business connection or direct messages topic as the message of
-// the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendSticker(ctx context.Context, p teleiq.SendStickerParams) (*models.Message, error) {
-	if err := c.fillDestination("SendSticker", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendSticker(ctx, p)
-}
-
-// SendRichMessage calls Client.SendRichMessage with p.ChatID set to the chat of the update. Like
-// Reply, it answers in the same forum topic, business connection or direct messages topic as the
-// message of the update, unless p sets them. It fails when the update has no chat.
-func (c *Context) SendRichMessage(ctx context.Context, p teleiq.SendRichMessageParams) (*models.Message, error) {
-	if err := c.fillDestination("SendRichMessage", destinationFields{chat: &p.ChatID, thread: &p.MessageThreadID, business: &p.BusinessConnectionID, topic: &p.DirectMessagesTopicID}); err != nil {
-		return nil, err
-	}
-	return c.bot.client.SendRichMessage(ctx, p)
 }
 
 // SendInvoice calls Client.SendInvoice with p.ChatID set to the chat of the update. Like Reply, it

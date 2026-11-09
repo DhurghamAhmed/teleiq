@@ -3,4 +3,4 @@
 package teleiq
 
 // SupportedBotAPIVersion is the Telegram Bot API version that this package implements.
-const SupportedBotAPIVersion = "10.3"
+const SupportedBotAPIVersion = "10.4"

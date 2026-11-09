@@ -184,6 +184,11 @@ type ChatFullInfo struct {
 	GuardBot *User `json:"guard_bot,omitempty"`
 	// The Community to which the chat belongs
 	Community *Community `json:"community,omitempty"`
+	// For private chats, the TON wallet card of the user, which is shown on their profile page
+	TonWalletCard *TonWalletCard `json:"ton_wallet_card,omitempty"`
+	// For private chats, supergroups and channels, the theme of the screen for sharing a link to the
+	// user or the chat; omitted if the default theme is used
+	ShareTheme ChatShareTheme `json:"share_theme,omitempty"`
 }
 
 // UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
@@ -192,6 +197,7 @@ func (v *ChatFullInfo) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		*fields
 		AvailableReactions []json.RawMessage `json:"available_reactions"`
+		ShareTheme         json.RawMessage   `json:"share_theme"`
 	}
 	raw.fields = (*fields)(v)
 	if err := json.Unmarshal(data, &raw); err != nil {
@@ -199,6 +205,9 @@ func (v *ChatFullInfo) UnmarshalJSON(data []byte) error {
 	}
 	var err error
 	if v.AvailableReactions, err = decodeEach(raw.AvailableReactions, decodeReactionType); err != nil {
+		return err
+	}
+	if v.ShareTheme, err = decodeChatShareTheme(raw.ShareTheme); err != nil {
 		return err
 	}
 	return nil
@@ -316,12 +325,15 @@ type Message struct {
 	VideoNote *VideoNote `json:"video_note,omitempty"`
 	// Message is a voice message, information about the file
 	Voice *Voice `json:"voice,omitempty"`
-	// Caption for the animation, audio, document, paid media, photo, video or voice
+	// Message is an HTML widget, information about the widget
+	Widget *Widget `json:"widget,omitempty"`
+	// Caption for the animation, audio, document, live photo, paid media, photo, video, voice, or
+	// widget
 	Caption *string `json:"caption,omitempty"`
 	// For messages with a caption, special entities like usernames, URLs, bot commands, etc. that
 	// appear in the caption
 	CaptionEntities []MessageEntity `json:"caption_entities,omitzero"`
-	// True, if the caption must be shown above the message media
+	// True, if the caption must be shown above the message media or the widget
 	ShowCaptionAboveMedia bool `json:"show_caption_above_media,omitempty"`
 	// True, if the message media is covered by a spoiler animation
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
@@ -436,6 +448,9 @@ type Message struct {
 	ManagedBotCreated *ManagedBotCreated `json:"managed_bot_created,omitempty"`
 	// Service message: the price for paid messages has changed in the chat
 	PaidMessagePriceChanged *PaidMessagePriceChanged `json:"paid_message_price_changed,omitempty"`
+	// Service message: the sender of the message used a link of the other user, which allows sending
+	// messages to the user without paying Telegram Stars
+	PaidMessagesWaived *PaidMessagesWaived `json:"paid_messages_waived,omitempty"`
 	// Service message: answer option was added to a poll
 	PollOptionAdded *PollOptionAdded `json:"poll_option_added,omitempty"`
 	// Service message: answer option was deleted from a poll
@@ -450,6 +465,8 @@ type Message struct {
 	SuggestedPostPaid *SuggestedPostPaid `json:"suggested_post_paid,omitempty"`
 	// Service message: payment for a suggested post was refunded
 	SuggestedPostRefunded *SuggestedPostRefunded `json:"suggested_post_refunded,omitempty"`
+	// Service message: a transfer with a TON wallet
+	TonWalletTransfer *TonWalletTransfer `json:"ton_wallet_transfer,omitempty"`
 	// Service message: video chat scheduled
 	VideoChatScheduled *VideoChatScheduled `json:"video_chat_scheduled,omitempty"`
 	// Service message: video chat started
@@ -557,15 +574,36 @@ type MessageEntity struct {
 // TextQuote contains information about the quoted part of a message that is replied to by the given
 // message.
 type TextQuote struct {
-	// Text of the quoted part of a message that is replied to by the given message
+	// Text of the quoted part of a message that is replied to by the given message; may be empty if
+	// the quote was chosen from a rich message
 	Text string `json:"text"`
 	// Special entities that appear in the quote.
 	Entities []MessageEntity `json:"entities,omitzero"`
+	// Rich text of the quote if it was chosen from a rich message.
+	RichTexts []RichText `json:"rich_texts,omitzero"`
 	// Approximate quote position in the original message in UTF-16 code units as specified by the
-	// sender
+	// sender.
 	Position int `json:"position"`
 	// True, if the quote was chosen manually by the message sender.
 	IsManual bool `json:"is_manual,omitempty"`
+}
+
+// UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
+func (v *TextQuote) UnmarshalJSON(data []byte) error {
+	type fields TextQuote
+	var raw struct {
+		*fields
+		RichTexts []json.RawMessage `json:"rich_texts"`
+	}
+	raw.fields = (*fields)(v)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	var err error
+	if v.RichTexts, err = decodeEach(raw.RichTexts, decodeRichText); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ExternalReplyInfo contains information about a message that is being replied to, which may come
@@ -601,6 +639,8 @@ type ExternalReplyInfo struct {
 	VideoNote *VideoNote `json:"video_note,omitempty"`
 	// Message is a voice message, information about the file
 	Voice *Voice `json:"voice,omitempty"`
+	// Message is an HTML widget, information about the widget
+	Widget *Widget `json:"widget,omitempty"`
 	// True, if the message media is covered by a spoiler animation
 	HasMediaSpoiler bool `json:"has_media_spoiler,omitempty"`
 	// Message is a checklist
@@ -649,7 +689,7 @@ type ReplyParameters struct {
 	// it is specified.
 	MessageID *int64 `json:"message_id,omitempty"`
 	// If the message to be replied to is from a different chat, unique identifier for the chat or
-	// username of the bot, supergroup or channel in the format @username.
+	// username of the bot, supergroup, or channel in the format @username.
 	ChatID ChatID `json:"chat_id,omitzero"`
 	// Identifier of the incoming ephemeral message that will be replied to in the current chat.
 	EphemeralMessageID *int64 `json:"ephemeral_message_id,omitempty"`
@@ -662,7 +702,9 @@ type ReplyParameters struct {
 	QuoteParseMode *string `json:"quote_parse_mode,omitempty"`
 	// A JSON-serialized list of special entities that appear in the quote.
 	QuoteEntities []MessageEntity `json:"quote_entities,omitzero"`
-	// Position of the quote in the original message in UTF-16 code units
+	// A JSON-serialized list of quoted parts of the rich message to be replied to.
+	QuoteRichTexts []RichText `json:"quote_rich_texts,omitzero"`
+	// Position of the quote in the original message in UTF-16 code units.
 	QuotePosition *int `json:"quote_position,omitempty"`
 	// Identifier of the specific checklist task to be replied to
 	ChecklistTaskID *int64 `json:"checklist_task_id,omitempty"`
@@ -672,9 +714,10 @@ type ReplyParameters struct {
 
 // EphemeralMessageParameters is a Bot API object.
 type EphemeralMessageParameters struct {
-	// Identifier of the user who will receive the message.
-	ReceiverUserID int64 `json:"receiver_user_id"`
-	// Identifier of the callback query which triggered the message, if any
+	// Identifier of the user who will receive the message; required unless the message is sent as an
+	// ephemeral reply to a callback query.
+	ReceiverUserID *int64 `json:"receiver_user_id,omitempty"`
+	// Identifier of the callback query which triggered the message, if any.
 	CallbackQueryID *string `json:"callback_query_id,omitempty"`
 	// Pass True if the ephemeral message must be shown in place of the original message.
 	ReplaceCallbackQueryMessage *bool `json:"replace_callback_query_message,omitempty"`
@@ -979,6 +1022,24 @@ type Voice struct {
 	MimeType *string `json:"mime_type,omitempty"`
 	// File size in bytes.
 	FileSize *int64 `json:"file_size,omitempty"`
+}
+
+// Widget describes an HTML widget.
+type Widget struct {
+	// Unique identifier of the shared widget, which can be used to send the widget again using the
+	// method sendSharedWidget; omitted if the widget isn't shared
+	ID *string `json:"id,omitempty"`
+	// Width of the widget in logical pixels; omitted if the widget must occupy the whole width of the
+	// message bubble
+	Width *int `json:"width,omitempty"`
+	// Height of the widget in logical pixels; omitted if the height of the widget isn't fixed
+	Height *int `json:"height,omitempty"`
+	// HTML code of the widget
+	HTML string `json:"html"`
+	// Public data of the widget, which is available wherever the widget is shown.
+	PublicData *string `json:"public_data,omitempty"`
+	// Data of the widget, which is specific to the message
+	ChatData *string `json:"chat_data,omitempty"`
 }
 
 // Describes the paid media added to a message.
@@ -1992,6 +2053,23 @@ type SuggestedPostRefunded struct {
 	Reason string `json:"reason"`
 }
 
+// Describes a service message about the sender of the message using a link of the other user, which
+// allows sending messages to the user without paying Telegram Stars.
+type PaidMessagesWaived struct{}
+
+// Describes a service message about a transfer with a TON wallet.
+type TonWalletTransfer struct {
+	// Unique identifier of the transaction; may be empty if the transfer hasn't been sent yet
+	TransactionID string `json:"transaction_id"`
+	// Address of the transfer peer in the TON blockchain
+	PeerAddress string `json:"peer_address"`
+	// The amount of transferred cryptocurrency, in the smallest units of the cryptocurrency, as a
+	// decimal number; negative for outgoing transfers
+	Amount string `json:"amount"`
+	// Comment added to the transfer; omitted if the comment is encrypted
+	Comment *string `json:"comment,omitempty"`
+}
+
 // GiveawayCreated represents a service message about the creation of a scheduled giveaway.
 type GiveawayCreated struct {
 	// The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways
@@ -2253,7 +2331,7 @@ type KeyboardButtonRequestManagedBot struct {
 	RequestID int64 `json:"request_id"`
 	// Suggested name for the bot
 	SuggestedName *string `json:"suggested_name,omitempty"`
-	// Suggested username for the bot
+	// Suggested username for the bot.
 	SuggestedUsername *string `json:"suggested_username,omitempty"`
 }
 
@@ -2397,6 +2475,184 @@ func (v *CallbackQuery) UnmarshalJSON(data []byte) error {
 	}
 	var err error
 	if v.Message, err = decodeMaybeInaccessibleMessage(raw.Message); err != nil {
+		return err
+	}
+	return nil
+}
+
+// WidgetQueryType describes the type of a query from a widget.
+//
+// Implemented by *WidgetQueryTypeData, *WidgetQueryTypeSignData, *WidgetQueryTypeSentTransaction
+// and *Unknown.
+type WidgetQueryType interface{ widgetQueryType() }
+
+func (*WidgetQueryTypeData) widgetQueryType()            {}
+func (*WidgetQueryTypeSignData) widgetQueryType()        {}
+func (*WidgetQueryTypeSentTransaction) widgetQueryType() {}
+func (*Unknown) widgetQueryType()                        {}
+
+func decodeWidgetQueryType(data []byte) (WidgetQueryType, error) {
+	if isNull(data) {
+		return nil, nil
+	}
+	var head struct {
+		Kind string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &head); err != nil {
+		return nil, err
+	}
+	var v WidgetQueryType
+	switch head.Kind {
+	case "data":
+		v = new(WidgetQueryTypeData)
+	case "sign_data":
+		v = new(WidgetQueryTypeSignData)
+	case "sent_transaction":
+		v = new(WidgetQueryTypeSentTransaction)
+	default:
+		return newUnknown(head.Kind, data), nil
+	}
+	if err := json.Unmarshal(data, v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// The query contains data for the bot.
+type WidgetQueryTypeData struct {
+	// TON wallet card of the user who sent the query, if it was sent to the bot along with the query
+	WalletCard *TonWalletCard `json:"wallet_card,omitempty"`
+}
+
+// MarshalJSON encodes v with "type" set to "data".
+func (v WidgetQueryTypeData) MarshalJSON() ([]byte, error) {
+	type fields WidgetQueryTypeData
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"data", fields(v)})
+}
+
+// The query contains data signed by a TON wallet of the user who sent the query.
+type WidgetQueryTypeSignData struct {
+	// The wallet that signed the data
+	Wallet WidgetQueryWallet `json:"wallet"`
+	// JSON-serialized signed data
+	SignData string `json:"sign_data"`
+}
+
+// MarshalJSON encodes v with "type" set to "sign_data".
+func (v WidgetQueryTypeSignData) MarshalJSON() ([]byte, error) {
+	type fields WidgetQueryTypeSignData
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"sign_data", fields(v)})
+}
+
+// The query notifies the bot about a transaction sent from a TON wallet of the user who sent the
+// query.
+type WidgetQueryTypeSentTransaction struct {
+	// The wallet from which the transaction was sent
+	Wallet WidgetQueryWallet `json:"wallet"`
+	// Value of msg_hash of the transaction
+	MsgHash string `json:"msg_hash"`
+}
+
+// MarshalJSON encodes v with "type" set to "sent_transaction".
+func (v WidgetQueryTypeSentTransaction) MarshalJSON() ([]byte, error) {
+	type fields WidgetQueryTypeSentTransaction
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"sent_transaction", fields(v)})
+}
+
+// WidgetQueryWallet describes a TON wallet of the user, which is used in a query from a widget.
+type WidgetQueryWallet struct {
+	// Address of the wallet
+	Address string `json:"address"`
+	// Balance of the wallet, in the smallest units of the cryptocurrency, as a decimal number
+	Amount string `json:"amount"`
+	// Hex-encoded public key of the wallet; omitted if unknown
+	PublicKey *string `json:"public_key,omitempty"`
+	// Base64-encoded serialized StateInit of the wallet contract; omitted if and only if public_key is
+	// omitted
+	StateInit *string `json:"state_init,omitempty"`
+}
+
+// WidgetQuery represents an incoming query from a widget in a message sent by the bot or via the
+// bot.
+type WidgetQuery struct {
+	// Unique identifier for this query
+	ID string `json:"id"`
+	// Sender
+	From User `json:"from"`
+	// Chat with the message containing the widget; omitted if the widget is in an inline message
+	Chat *Chat `json:"chat,omitempty"`
+	// Identifier of the message containing the widget; omitted if the widget is in an inline message
+	MessageID *int64 `json:"message_id,omitempty"`
+	// Identifier of the inline message containing the widget
+	InlineMessageID *string `json:"inline_message_id,omitempty"`
+	// Global identifier, uniquely corresponding to the chat to which the message with the widget was
+	// sent
+	ChatInstance string `json:"chat_instance"`
+	// For widgets in inline messages, type of the chat to which the message was sent.
+	ChatType *string `json:"chat_type,omitempty"`
+	// Type of the query
+	Type WidgetQueryType `json:"type"`
+	// Data of the query, 1-64 bytes
+	Data string `json:"data"`
+	// Unique identifier of the shared widget, which sent the query; omitted if the widget isn't shared
+	WidgetID *string `json:"widget_id,omitempty"`
+}
+
+// UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
+func (v *WidgetQuery) UnmarshalJSON(data []byte) error {
+	type fields WidgetQuery
+	var raw struct {
+		*fields
+		Type json.RawMessage `json:"type"`
+	}
+	raw.fields = (*fields)(v)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	var err error
+	if v.Type, err = decodeWidgetQueryType(raw.Type); err != nil {
+		return err
+	}
+	return nil
+}
+
+// SharedWidgetQuery represents an incoming query from a forwarded message with a shared widget
+// created by the bot.
+type SharedWidgetQuery struct {
+	// Unique identifier for this query
+	ID string `json:"id"`
+	// Sender
+	From User `json:"from"`
+	// Type of the query
+	Type WidgetQueryType `json:"type"`
+	// Data of the query, 1-64 bytes
+	Data string `json:"data"`
+	// Unique identifier of the shared widget, which sent the query
+	WidgetID string `json:"widget_id"`
+}
+
+// UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
+func (v *SharedWidgetQuery) UnmarshalJSON(data []byte) error {
+	type fields SharedWidgetQuery
+	var raw struct {
+		*fields
+		Type json.RawMessage `json:"type"`
+	}
+	raw.fields = (*fields)(v)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	var err error
+	if v.Type, err = decodeWidgetQueryType(raw.Type); err != nil {
 		return err
 	}
 	return nil
@@ -2745,7 +3001,7 @@ type ChatMemberRestricted struct {
 	CanSendVoiceNotes bool `json:"can_send_voice_notes"`
 	// True, if the user is allowed to send polls and checklists
 	CanSendPolls bool `json:"can_send_polls"`
-	// True, if the user is allowed to send animations, games, stickers and use inline bots
+	// True, if the user is allowed to send animations, games, stickers, widgets and use inline bots
 	CanSendOtherMessages bool `json:"can_send_other_messages"`
 	// True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews"`
@@ -2844,7 +3100,7 @@ type ChatPermissions struct {
 	CanSendVoiceNotes *bool `json:"can_send_voice_notes,omitempty"`
 	// True, if the user is allowed to send polls and checklists
 	CanSendPolls *bool `json:"can_send_polls,omitempty"`
-	// True, if the user is allowed to send animations, games, stickers and use inline bots
+	// True, if the user is allowed to send animations, games, stickers, widgets and use inline bots
 	CanSendOtherMessages *bool `json:"can_send_other_messages,omitempty"`
 	// True, if the user is allowed to add web page previews to their messages
 	CanAddWebPagePreviews *bool `json:"can_add_web_page_previews,omitempty"`
@@ -2921,20 +3177,234 @@ type UserRating struct {
 	NextLevelRating *int `json:"next_level_rating,omitempty"`
 }
 
-// Describes the position of a clickable area within a story.
-type StoryAreaPosition struct {
-	// The abscissa of the area's center, as a percentage of the media width
+// Describes the position of a rectangle area on a story media or a TON wallet card.
+type AreaPosition struct {
+	// The abscissa of the area's center, as a percentage of the media or the card width
 	XPercentage float64 `json:"x_percentage"`
-	// The ordinate of the area's center, as a percentage of the media height
+	// The ordinate of the area's center, as a percentage of the media or the card height
 	YPercentage float64 `json:"y_percentage"`
-	// The width of the area's rectangle, as a percentage of the media width
+	// The width of the area's rectangle, as a percentage of the media or the card width
 	WidthPercentage float64 `json:"width_percentage"`
-	// The height of the area's rectangle, as a percentage of the media height
+	// The height of the area's rectangle, as a percentage of the media or the card height
 	HeightPercentage float64 `json:"height_percentage"`
 	// The clockwise rotation angle of the rectangle, in degrees; 0-360
 	RotationAngle float64 `json:"rotation_angle"`
-	// The radius of the rectangle corner rounding, as a percentage of the media width
+	// The radius of the rectangle corner rounding, as a percentage of the media or the card width
 	CornerRadiusPercentage float64 `json:"corner_radius_percentage"`
+}
+
+// TonNft represents an NFT in the TON blockchain.
+type TonNft struct {
+	// Address of the NFT
+	Address string `json:"address"`
+	// Address of the collection to which the NFT belongs; omitted if unknown
+	CollectionAddress *string `json:"collection_address,omitempty"`
+	// Index of the NFT among all NFTs from the collection as a decimal number
+	Index string `json:"index"`
+	// Name of the NFT
+	Name string `json:"name"`
+	// Description of the NFT
+	Description string `json:"description"`
+	// Attributes of the NFT
+	Attributes []TonNftAttribute `json:"attributes,omitzero"`
+	// The unique gift corresponding to the NFT
+	Gift *UniqueGift `json:"gift,omitempty"`
+}
+
+// TonNftAttribute represents an attribute of an NFT in the TON blockchain.
+type TonNftAttribute struct {
+	// Trait type of the attribute
+	TraitType string `json:"trait_type"`
+	// Value of the attribute
+	Value string `json:"value"`
+}
+
+// TonWalletCardSticker describes a sticker on a TON wallet card.
+type TonWalletCardSticker struct {
+	// Position of the sticker on the card
+	Position AreaPosition `json:"position"`
+	// The NFT shown as the sticker
+	Nft TonNft `json:"nft"`
+}
+
+// TonWalletCard describes a TON wallet card, which is shown on the profile page of a user to
+// everyone.
+type TonWalletCard struct {
+	// Address of the wallet
+	Address string `json:"address"`
+	// Balance of the wallet, in the smallest units of the cryptocurrency, as a decimal number
+	Amount string `json:"amount"`
+	// Stickers placed on the card
+	Stickers []TonWalletCardSticker `json:"stickers"`
+	// Address of the NFT of one of the stickers, whose colors must be used for the card background;
+	// omitted if the default background must be used
+	BackgroundNftAddress *string `json:"background_nft_address,omitempty"`
+}
+
+// EmojiType describes an emoji.
+//
+// Implemented by *EmojiTypeEmoji, *EmojiTypeCustomEmoji and *Unknown.
+type EmojiType interface{ emojiType() }
+
+func (*EmojiTypeEmoji) emojiType()       {}
+func (*EmojiTypeCustomEmoji) emojiType() {}
+func (*Unknown) emojiType()              {}
+
+func decodeEmojiType(data []byte) (EmojiType, error) {
+	if isNull(data) {
+		return nil, nil
+	}
+	var head struct {
+		Kind string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &head); err != nil {
+		return nil, err
+	}
+	var v EmojiType
+	switch head.Kind {
+	case "emoji":
+		v = new(EmojiTypeEmoji)
+	case "custom_emoji":
+		v = new(EmojiTypeCustomEmoji)
+	default:
+		return newUnknown(head.Kind, data), nil
+	}
+	if err := json.Unmarshal(data, v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// A regular emoji.
+type EmojiTypeEmoji struct {
+	// The emoji
+	Emoji string `json:"emoji"`
+}
+
+// MarshalJSON encodes v with "type" set to "emoji".
+func (v EmojiTypeEmoji) MarshalJSON() ([]byte, error) {
+	type fields EmojiTypeEmoji
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"emoji", fields(v)})
+}
+
+// A custom emoji.
+type EmojiTypeCustomEmoji struct {
+	// Identifier of the custom emoji.
+	CustomEmojiID string `json:"custom_emoji_id"`
+}
+
+// MarshalJSON encodes v with "type" set to "custom_emoji".
+func (v EmojiTypeCustomEmoji) MarshalJSON() ([]byte, error) {
+	type fields EmojiTypeCustomEmoji
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"custom_emoji", fields(v)})
+}
+
+// ChatShareTheme describes the theme of the screen for sharing a link to a user or a chat.
+//
+// Implemented by *ChatShareThemeEmoji, *ChatShareThemeUniqueGift and *Unknown.
+type ChatShareTheme interface{ chatShareTheme() }
+
+func (*ChatShareThemeEmoji) chatShareTheme()      {}
+func (*ChatShareThemeUniqueGift) chatShareTheme() {}
+func (*Unknown) chatShareTheme()                  {}
+
+func decodeChatShareTheme(data []byte) (ChatShareTheme, error) {
+	if isNull(data) {
+		return nil, nil
+	}
+	var head struct {
+		Kind string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &head); err != nil {
+		return nil, err
+	}
+	var v ChatShareTheme
+	switch head.Kind {
+	case "emoji":
+		v = new(ChatShareThemeEmoji)
+	case "unique_gift":
+		v = new(ChatShareThemeUniqueGift)
+	default:
+		return newUnknown(head.Kind, data), nil
+	}
+	if err := json.Unmarshal(data, v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// The theme with emoji placed on a background.
+type ChatShareThemeEmoji struct {
+	// The emoji; 0-6 regular or custom emoji
+	Emojis []EmojiType `json:"emojis"`
+	// Identifier of the backdrop used as the background; omitted if the default background is used.
+	BackgroundBackdropID *int64 `json:"background_backdrop_id,omitempty"`
+}
+
+// MarshalJSON encodes v with "type" set to "emoji".
+func (v ChatShareThemeEmoji) MarshalJSON() ([]byte, error) {
+	type fields ChatShareThemeEmoji
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"emoji", fields(v)})
+}
+
+// UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
+func (v *ChatShareThemeEmoji) UnmarshalJSON(data []byte) error {
+	type fields ChatShareThemeEmoji
+	var raw struct {
+		*fields
+		Emojis []json.RawMessage `json:"emojis"`
+	}
+	raw.fields = (*fields)(v)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	var err error
+	if v.Emojis, err = decodeEach(raw.Emojis, decodeEmojiType); err != nil {
+		return err
+	}
+	return nil
+}
+
+// The theme based on a unique gift owned by the user or the chat.
+type ChatShareThemeUniqueGift struct {
+	// The gift
+	Gift UniqueGift `json:"gift"`
+}
+
+// MarshalJSON encodes v with "type" set to "unique_gift".
+func (v ChatShareThemeUniqueGift) MarshalJSON() ([]byte, error) {
+	type fields ChatShareThemeUniqueGift
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"unique_gift", fields(v)})
+}
+
+// ChatShareThemeBackdrops contains a list of backdrops, which can be used as the background of a
+// theme of the screen for sharing a link to a user or a chat.
+type ChatShareThemeBackdrops struct {
+	// The list of backdrops
+	Backdrops []ChatShareThemeBackdrop `json:"backdrops"`
+}
+
+// ChatShareThemeBackdrop describes a backdrop, which can be used as the background of a theme of
+// the screen for sharing a link to a user or a chat.
+type ChatShareThemeBackdrop struct {
+	// Unique identifier of the backdrop
+	ID int64 `json:"id"`
+	// Name of the backdrop
+	Name string `json:"name"`
+	// Colors of the backdrop
+	Colors UniqueGiftBackdropColors `json:"colors"`
 }
 
 // Describes the physical address of a location.
@@ -3051,7 +3521,7 @@ func (v StoryAreaTypeUniqueGift) MarshalJSON() ([]byte, error) {
 // Describes a clickable area on a story media.
 type StoryArea struct {
 	// Position of the area
-	Position StoryAreaPosition `json:"position"`
+	Position AreaPosition `json:"position"`
 	// Type of the area
 	Type StoryAreaType `json:"type"`
 }

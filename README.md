@@ -1,7 +1,7 @@
 # TeleIQ
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/DhurghamAhmed/teleiq.svg)](https://pkg.go.dev/github.com/DhurghamAhmed/teleiq)
-[![Bot API 10.3](https://img.shields.io/badge/Bot%20API-10.3-2CA5E0?logo=telegram)](https://core.telegram.org/bots/api)
+[![Bot API 10.4](https://img.shields.io/badge/Bot%20API-10.4-2CA5E0?logo=telegram)](https://core.telegram.org/bots/api)
 [![Go 1.27+](https://img.shields.io/badge/Go-1.27%2B-00ADD8?logo=go)](https://go.dev/dl/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
@@ -15,7 +15,7 @@
 TeleIQ is a Go library for the [Telegram Bot API](https://core.telegram.org/bots/api),
 with a framework for bots that run for months.
 
-Every type and method of Bot API 10.3 is typed Go code, generated from the
+Every type and method of Bot API 10.4 is typed Go code, generated from the
 official documentation. The framework receives updates by long polling or
 webhook, handles the updates of each chat in order, retries failed requests,
 and never writes the bot token to errors or logs.

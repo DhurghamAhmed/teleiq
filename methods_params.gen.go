@@ -54,9 +54,10 @@ type DeleteWebhookParams struct {
 type SendMessageParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -111,7 +112,7 @@ func (p *SendMessageParams) applyDefaults(d *Defaults) {
 
 // ForwardMessageParams holds the parameters of ForwardMessage.
 type ForwardMessageParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -121,7 +122,7 @@ type ForwardMessageParams struct {
 	// message is forwarded to a direct messages chat
 	DirectMessagesTopicID *int64 `json:"direct_messages_topic_id,omitempty"`
 	// Unique identifier for the chat where the original message was sent (or username of the target
-	// bot, supergroup or channel in the format @username)
+	// bot, supergroup, or channel in the format @username)
 	FromChatID models.ChatID `json:"from_chat_id"`
 	// New start timestamp for the forwarded video in the message
 	VideoStartTimestamp *int `json:"video_start_timestamp,omitempty"`
@@ -152,7 +153,7 @@ func (p *ForwardMessageParams) applyDefaults(d *Defaults) {
 
 // ForwardMessagesParams holds the parameters of ForwardMessages.
 type ForwardMessagesParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -162,7 +163,7 @@ type ForwardMessagesParams struct {
 	// messages are forwarded to a direct messages chat
 	DirectMessagesTopicID *int64 `json:"direct_messages_topic_id,omitempty"`
 	// Unique identifier for the chat where the original messages were sent (or username of the target
-	// bot, supergroup or channel in the format @username)
+	// bot, supergroup, or channel in the format @username)
 	FromChatID models.ChatID `json:"from_chat_id"`
 	// A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to forward.
 	MessageIDs []int64 `json:"message_ids"`
@@ -185,7 +186,7 @@ func (p *ForwardMessagesParams) applyDefaults(d *Defaults) {
 
 // CopyMessageParams holds the parameters of CopyMessage.
 type CopyMessageParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -195,7 +196,7 @@ type CopyMessageParams struct {
 	// message is sent to a direct messages chat
 	DirectMessagesTopicID *int64 `json:"direct_messages_topic_id,omitempty"`
 	// Unique identifier for the chat where the original message was sent (or username of the target
-	// bot, supergroup or channel in the format @username)
+	// bot, supergroup, or channel in the format @username)
 	FromChatID models.ChatID `json:"from_chat_id"`
 	// Message identifier in the chat specified in from_chat_id
 	MessageID int64 `json:"message_id"`
@@ -245,7 +246,7 @@ func (p *CopyMessageParams) applyDefaults(d *Defaults) {
 
 // CopyMessagesParams holds the parameters of CopyMessages.
 type CopyMessagesParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -255,7 +256,7 @@ type CopyMessagesParams struct {
 	// messages are sent to a direct messages chat
 	DirectMessagesTopicID *int64 `json:"direct_messages_topic_id,omitempty"`
 	// Unique identifier for the chat where the original messages were sent (or username of the target
-	// bot, supergroup or channel in the format @username)
+	// bot, supergroup, or channel in the format @username)
 	FromChatID models.ChatID `json:"from_chat_id"`
 	// A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy.
 	MessageIDs []int64 `json:"message_ids"`
@@ -282,9 +283,10 @@ func (p *CopyMessagesParams) applyDefaults(d *Defaults) {
 type SendPhotoParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -347,9 +349,10 @@ func (p *SendPhotoParams) applyDefaults(d *Defaults) {
 type SendLivePhotoParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target channel (in the format
-	// @channelusername)
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -415,9 +418,10 @@ func (p *SendLivePhotoParams) applyDefaults(d *Defaults) {
 type SendAudioParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -485,9 +489,10 @@ func (p *SendAudioParams) applyDefaults(d *Defaults) {
 type SendDocumentParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -553,9 +558,10 @@ func (p *SendDocumentParams) applyDefaults(d *Defaults) {
 type SendVideoParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -635,9 +641,10 @@ func (p *SendVideoParams) applyDefaults(d *Defaults) {
 type SendAnimationParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -710,9 +717,10 @@ func (p *SendAnimationParams) applyDefaults(d *Defaults) {
 type SendVoiceParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -772,9 +780,10 @@ func (p *SendVoiceParams) applyDefaults(d *Defaults) {
 type SendVideoNoteParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -826,11 +835,122 @@ func (p *SendVideoNoteParams) applyDefaults(d *Defaults) {
 	}
 }
 
+// SendWidgetParams holds the parameters of SendWidget.
+type SendWidgetParams struct {
+	// Unique identifier for the target chat or username of the target supergroup in the format
+	// @username
+	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
+	// private chats of bots with forum topic mode enabled only
+	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
+	// HTML code of the widget, 1-32768 bytes.
+	HTML string `json:"html"`
+	// Width of the widget in logical pixels; omit if the widget must occupy the whole width of the
+	// message bubble.
+	Width *int `json:"width,omitempty"`
+	// Height of the widget in logical pixels; omit if the height of the widget isn't fixed.
+	Height *int `json:"height,omitempty"`
+	// Public data of the widget, 0-1024 bytes, which will be available wherever the widget is shown.
+	PublicData *string `json:"public_data,omitempty"`
+	// Data of the widget, which is specific to the message, 0-1024 bytes
+	ChatData *string `json:"chat_data,omitempty"`
+	// Widget caption, 0-1024 characters after entities parsing
+	Caption *string `json:"caption,omitempty"`
+	// Mode for parsing entities in the widget caption.
+	ParseMode *string `json:"parse_mode,omitempty"`
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified
+	// instead of parse_mode
+	CaptionEntities []models.MessageEntity `json:"caption_entities,omitzero"`
+	// Pass True if the caption must be shown above the widget
+	ShowCaptionAboveMedia *bool `json:"show_caption_above_media,omitempty"`
+	// Pass True to allow the widget to send queries to the bot
+	AllowQueries *bool `json:"allow_queries,omitempty"`
+	// Pass True to create a shared widget, which can be sent again using the method sendSharedWidget
+	IsShared *bool `json:"is_shared,omitempty"`
+	// Sends the message silently.
+	DisableNotification *bool `json:"disable_notification,omitempty"`
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent *bool `json:"protect_content,omitempty"`
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1
+	// Telegram Stars per message.
+	AllowPaidBroadcast *bool `json:"allow_paid_broadcast,omitempty"`
+	// Unique identifier of the message effect to be added to the message; for private chats only
+	MessageEffectID *string `json:"message_effect_id,omitempty"`
+	// Description of the message to reply to
+	ReplyParameters *models.ReplyParameters `json:"reply_parameters,omitempty"`
+	// Additional interface options.
+	ReplyMarkup models.ReplyMarkup `json:"reply_markup,omitempty"`
+}
+
+func (v SendWidgetParams) targetChat() models.ChatID { return v.ChatID }
+
+func (p *SendWidgetParams) applyDefaults(d *Defaults) {
+	if p.ParseMode == nil && d.ParseMode != "" && len(p.CaptionEntities) == 0 {
+		p.ParseMode = Ptr(d.ParseMode)
+	}
+	if p.DisableNotification == nil && d.DisableNotification {
+		p.DisableNotification = Ptr(true)
+	}
+	if p.ProtectContent == nil && d.ProtectContent {
+		p.ProtectContent = Ptr(true)
+	}
+}
+
+// SendSharedWidgetParams holds the parameters of SendSharedWidget.
+type SendSharedWidgetParams struct {
+	// Unique identifier for the target chat or username of the target supergroup in the format
+	// @username
+	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
+	// private chats of bots with forum topic mode enabled only
+	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
+	// Unique identifier of the shared widget
+	WidgetID string `json:"widget_id"`
+	// Data of the widget, which is specific to the message, 0-1024 bytes
+	ChatData *string `json:"chat_data,omitempty"`
+	// Widget caption, 0-1024 characters after entities parsing
+	Caption *string `json:"caption,omitempty"`
+	// Mode for parsing entities in the widget caption.
+	ParseMode *string `json:"parse_mode,omitempty"`
+	// A JSON-serialized list of special entities that appear in the caption, which can be specified
+	// instead of parse_mode
+	CaptionEntities []models.MessageEntity `json:"caption_entities,omitzero"`
+	// Pass True if the caption must be shown above the widget
+	ShowCaptionAboveMedia *bool `json:"show_caption_above_media,omitempty"`
+	// Sends the message silently.
+	DisableNotification *bool `json:"disable_notification,omitempty"`
+	// Protects the contents of the sent message from forwarding and saving
+	ProtectContent *bool `json:"protect_content,omitempty"`
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1
+	// Telegram Stars per message.
+	AllowPaidBroadcast *bool `json:"allow_paid_broadcast,omitempty"`
+	// Unique identifier of the message effect to be added to the message; for private chats only
+	MessageEffectID *string `json:"message_effect_id,omitempty"`
+	// Description of the message to reply to
+	ReplyParameters *models.ReplyParameters `json:"reply_parameters,omitempty"`
+	// Additional interface options.
+	ReplyMarkup models.ReplyMarkup `json:"reply_markup,omitempty"`
+}
+
+func (v SendSharedWidgetParams) targetChat() models.ChatID { return v.ChatID }
+
+func (p *SendSharedWidgetParams) applyDefaults(d *Defaults) {
+	if p.ParseMode == nil && d.ParseMode != "" && len(p.CaptionEntities) == 0 {
+		p.ParseMode = Ptr(d.ParseMode)
+	}
+	if p.DisableNotification == nil && d.DisableNotification {
+		p.DisableNotification = Ptr(true)
+	}
+	if p.ProtectContent == nil && d.ProtectContent {
+		p.ProtectContent = Ptr(true)
+	}
+}
+
 // SendPaidMediaParams holds the parameters of SendPaidMedia.
 type SendPaidMediaParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username.
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -894,7 +1014,7 @@ func (p *SendPaidMediaParams) applyDefaults(d *Defaults) {
 type SendMediaGroupParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -939,9 +1059,10 @@ func (p *SendMediaGroupParams) applyDefaults(d *Defaults) {
 type SendLocationParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -997,9 +1118,10 @@ func (p *SendLocationParams) applyDefaults(d *Defaults) {
 type SendVenueParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -1057,9 +1179,10 @@ func (p *SendVenueParams) applyDefaults(d *Defaults) {
 type SendContactParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -1109,7 +1232,7 @@ func (p *SendContactParams) applyDefaults(d *Defaults) {
 type SendPollParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username.
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -1241,7 +1364,7 @@ func (p *SendChecklistParams) applyDefaults(d *Defaults) {
 type SendDiceParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
@@ -1326,7 +1449,7 @@ func (v SendChatActionParams) targetChat() models.ChatID { return v.ChatID }
 
 // SetMessageReactionParams holds the parameters of SetMessageReaction.
 type SetMessageReactionParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Identifier of the target message.
@@ -1963,6 +2086,14 @@ type AnswerCallbackQueryParams struct {
 	CacheTime *int `json:"cache_time,omitempty"`
 }
 
+// AnswerWidgetQueryParams holds the parameters of AnswerWidgetQuery.
+type AnswerWidgetQueryParams struct {
+	// Unique identifier for the query to be answered
+	WidgetQueryID string `json:"widget_query_id"`
+	// Data to be returned to the widget, 0-1024 bytes
+	Data *string `json:"data,omitempty"`
+}
+
 // AnswerGuestQueryParams holds the parameters of AnswerGuestQuery.
 type AnswerGuestQueryParams struct {
 	// Unique identifier for the query to be answered
@@ -2171,15 +2302,25 @@ type VerifyUserParams struct {
 	UserID int64 `json:"user_id"`
 	// Custom description for the verification; 0-70 characters.
 	CustomDescription *string `json:"custom_description,omitempty"`
+	// Mode for parsing entities in the custom description.
+	CustomDescriptionParseMode *string `json:"custom_description_parse_mode,omitempty"`
+	// A JSON-serialized list of special entities that appear in the custom description, which can be
+	// specified instead of custom_description_parse_mode.
+	CustomDescriptionEntities []models.MessageEntity `json:"custom_description_entities,omitzero"`
 }
 
 // VerifyChatParams holds the parameters of VerifyChat.
 type VerifyChatParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username.
 	ChatID models.ChatID `json:"chat_id"`
 	// Custom description for the verification; 0-70 characters.
 	CustomDescription *string `json:"custom_description,omitempty"`
+	// Mode for parsing entities in the custom description.
+	CustomDescriptionParseMode *string `json:"custom_description_parse_mode,omitempty"`
+	// A JSON-serialized list of special entities that appear in the custom description, which can be
+	// specified instead of custom_description_parse_mode.
+	CustomDescriptionEntities []models.MessageEntity `json:"custom_description_entities,omitzero"`
 }
 
 func (v VerifyChatParams) targetChat() models.ChatID { return v.ChatID }
@@ -2381,6 +2522,12 @@ type GetChatGiftsParams struct {
 
 func (v GetChatGiftsParams) targetChat() models.ChatID { return v.ChatID }
 
+// GetUniqueGiftParams holds the parameters of GetUniqueGift.
+type GetUniqueGiftParams struct {
+	// Unique name of the gift
+	Name string `json:"name"`
+}
+
 // ConvertGiftToStarsParams holds the parameters of ConvertGiftToStars.
 type ConvertGiftToStarsParams struct {
 	// Unique identifier of the business connection
@@ -2413,6 +2560,14 @@ type TransferGiftParams struct {
 	// The amount of Telegram Stars that will be paid for the transfer from the business account
 	// balance.
 	StarCount *int `json:"star_count,omitempty"`
+}
+
+// DeleteBusinessAccountGiftParams holds the parameters of DeleteBusinessAccountGift.
+type DeleteBusinessAccountGiftParams struct {
+	// Unique identifier of the business connection
+	BusinessConnectionID string `json:"business_connection_id"`
+	// Unique identifier of the regular gift that should be deleted
+	OwnedGiftID string `json:"owned_gift_id"`
 }
 
 // PostStoryParams holds the parameters of PostStory.
@@ -2712,6 +2867,34 @@ type EditMessageChecklistParams struct {
 
 func (v EditMessageChecklistParams) targetChat() models.ChatID { return v.ChatID }
 
+// EditMessageWidgetDataParams holds the parameters of EditMessageWidgetData.
+type EditMessageWidgetDataParams struct {
+	// Required if inline_message_id is not specified.
+	ChatID models.ChatID `json:"chat_id,omitzero"`
+	// Required if inline_message_id is not specified.
+	MessageID *int64 `json:"message_id,omitempty"`
+	// Required if chat_id and message_id are not specified.
+	InlineMessageID *string `json:"inline_message_id,omitempty"`
+	// New public data of the widget, 0-1024 bytes; pass an empty string to remove the public data.
+	PublicData *string `json:"public_data,omitempty"`
+	// New data of the widget, which is specific to the message, 0-1024 bytes; pass an empty string to
+	// remove the data.
+	ChatData *string `json:"chat_data,omitempty"`
+}
+
+func (v EditMessageWidgetDataParams) targetChat() models.ChatID { return v.ChatID }
+
+// EditSharedWidgetDataParams holds the parameters of EditSharedWidgetData.
+type EditSharedWidgetDataParams struct {
+	// Unique identifier of the shared widget
+	WidgetID string `json:"widget_id"`
+	// New public data of the widget, 0-1024 bytes; pass an empty string to remove the public data
+	PublicData string `json:"public_data"`
+	// The maximum amount of time in seconds that the public data of the widget may be cached
+	// client-side; 5-3600.
+	CacheTime *int `json:"cache_time,omitempty"`
+}
+
 // EditMessageReplyMarkupParams holds the parameters of EditMessageReplyMarkup.
 type EditMessageReplyMarkupParams struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was
@@ -2734,7 +2917,7 @@ type StopPollParams struct {
 	// Unique identifier of the business connection on behalf of which the message to be edited was
 	// sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Identifier of the original message with the poll
@@ -2874,7 +3057,7 @@ type DeclineSuggestedPostParams struct {
 
 // DeleteMessageParams holds the parameters of DeleteMessage.
 type DeleteMessageParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Identifier of the message to delete
@@ -2885,7 +3068,7 @@ func (v DeleteMessageParams) targetChat() models.ChatID { return v.ChatID }
 
 // DeleteMessagesParams holds the parameters of DeleteMessages.
 type DeleteMessagesParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// A JSON-serialized list of 1-100 identifiers of messages to delete.
@@ -2939,9 +3122,10 @@ func (v DeleteAllMessageReactionsParams) targetChat() models.ChatID { return v.C
 type SendStickerParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -3155,9 +3339,10 @@ type DeleteStickerSetParams struct {
 type SendRichMessageParams struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent.
 	BusinessConnectionID *string `json:"business_connection_id,omitempty"`
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
-	// the format @username
-	ChatID models.ChatID `json:"chat_id"`
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
+	// the format @username; required unless the message is sent as an ephemeral reply to a callback
+	// query
+	ChatID models.ChatID `json:"chat_id,omitzero"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and
 	// private chats of bots with forum topic mode enabled only
 	MessageThreadID *int64 `json:"message_thread_id,omitempty"`
@@ -3247,7 +3432,7 @@ func (v AnswerInlineQueryParams) collectFiles(c *upload.Set) {
 
 // SendInvoiceParams holds the parameters of SendInvoice.
 type SendInvoiceParams struct {
-	// Unique identifier for the target chat or username of the target bot, supergroup or channel in
+	// Unique identifier for the target chat or username of the target bot, supergroup, or channel in
 	// the format @username
 	ChatID models.ChatID `json:"chat_id"`
 	// Unique identifier for the target message thread (topic) of a forum; for forum supergroups and

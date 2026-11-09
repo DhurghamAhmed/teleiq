@@ -751,15 +751,18 @@ func (v InlineQueryResultCachedAudio) MarshalJSON() ([]byte, error) {
 // query.
 //
 // Implemented by *InputTextMessageContent, *InputRichMessageContent, *InputLocationMessageContent,
-// *InputVenueMessageContent, *InputContactMessageContent and *InputInvoiceMessageContent.
+// *InputVenueMessageContent, *InputContactMessageContent, *InputInvoiceMessageContent,
+// *InputWidgetMessageContent and *InputSharedWidgetMessageContent.
 type InputMessageContent interface{ inputMessageContent() }
 
-func (*InputTextMessageContent) inputMessageContent()     {}
-func (*InputRichMessageContent) inputMessageContent()     {}
-func (*InputLocationMessageContent) inputMessageContent() {}
-func (*InputVenueMessageContent) inputMessageContent()    {}
-func (*InputContactMessageContent) inputMessageContent()  {}
-func (*InputInvoiceMessageContent) inputMessageContent()  {}
+func (*InputTextMessageContent) inputMessageContent()         {}
+func (*InputRichMessageContent) inputMessageContent()         {}
+func (*InputLocationMessageContent) inputMessageContent()     {}
+func (*InputVenueMessageContent) inputMessageContent()        {}
+func (*InputContactMessageContent) inputMessageContent()      {}
+func (*InputInvoiceMessageContent) inputMessageContent()      {}
+func (*InputWidgetMessageContent) inputMessageContent()       {}
+func (*InputSharedWidgetMessageContent) inputMessageContent() {}
 
 // Represents the content of a text message to be sent as the result of an inline query.
 type InputTextMessageContent struct {
@@ -876,6 +879,53 @@ type InputInvoiceMessageContent struct {
 	SendEmailToProvider *bool `json:"send_email_to_provider,omitempty"`
 	// Pass True if the final price depends on the shipping method.
 	IsFlexible *bool `json:"is_flexible,omitempty"`
+}
+
+// Represents the content of a message with an HTML widget to be sent as the result of an inline
+// query.
+type InputWidgetMessageContent struct {
+	// HTML code of the widget, 1-32768 bytes.
+	HTML string `json:"html"`
+	// Width of the widget in logical pixels; omit if the widget must occupy the whole width of the
+	// message bubble.
+	Width *int `json:"width,omitempty"`
+	// Height of the widget in logical pixels; omit if the height of the widget isn't fixed.
+	Height *int `json:"height,omitempty"`
+	// Public data of the widget, 0-1024 bytes, which will be available wherever the widget is shown.
+	PublicData *string `json:"public_data,omitempty"`
+	// Data of the widget, which is specific to the message, 0-1024 bytes
+	ChatData *string `json:"chat_data,omitempty"`
+	// Widget caption, 0-1024 characters after entities parsing
+	Caption *string `json:"caption,omitempty"`
+	// Mode for parsing entities in the widget caption.
+	ParseMode *string `json:"parse_mode,omitempty"`
+	// List of special entities that appear in the caption, which can be specified instead of
+	// parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitzero"`
+	// Pass True if the caption must be shown above the widget
+	ShowCaptionAboveMedia *bool `json:"show_caption_above_media,omitempty"`
+	// Pass True to allow the widget to send queries to the bot
+	AllowQueries *bool `json:"allow_queries,omitempty"`
+	// Pass True to create a shared widget.
+	IsShared *bool `json:"is_shared,omitempty"`
+}
+
+// Represents the content of a message with a shared widget to be sent as the result of an inline
+// query.
+type InputSharedWidgetMessageContent struct {
+	// Unique identifier of the shared widget created by the bot
+	WidgetID string `json:"widget_id"`
+	// Data of the widget, which is specific to the message, 0-1024 bytes
+	ChatData *string `json:"chat_data,omitempty"`
+	// Widget caption, 0-1024 characters after entities parsing
+	Caption *string `json:"caption,omitempty"`
+	// Mode for parsing entities in the widget caption.
+	ParseMode *string `json:"parse_mode,omitempty"`
+	// List of special entities that appear in the caption, which can be specified instead of
+	// parse_mode
+	CaptionEntities []MessageEntity `json:"caption_entities,omitzero"`
+	// Pass True if the caption must be shown above the widget
+	ShowCaptionAboveMedia *bool `json:"show_caption_above_media,omitempty"`
 }
 
 // Represents a result of an inline query that was chosen by the user and sent to their chat

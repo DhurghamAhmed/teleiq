@@ -114,9 +114,9 @@ func (v *RichMessageButton) UnmarshalJSON(data []byte) error {
 // *RichTextStrikethrough, *RichTextSpoiler, *RichTextDateTime, *RichTextTextMention,
 // *RichTextSubscript, *RichTextSuperscript, *RichTextMarked, *RichTextCode, *RichTextCustomEmoji,
 // *RichTextMathematicalExpression, *RichTextUrl, *RichTextEmailAddress, *RichTextPhoneNumber,
-// *RichTextBankCardNumber, *RichTextMention, *RichTextHashtag, *RichTextCashtag,
-// *RichTextBotCommand, *RichTextButton, *RichTextAnchor, *RichTextAnchorLink, *RichTextReference,
-// *RichTextReferenceLink and *Unknown.
+// *RichTextBankCardNumber, *RichTextTonAddress, *RichTextMention, *RichTextHashtag,
+// *RichTextCashtag, *RichTextBotCommand, *RichTextButton, *RichTextAnchor, *RichTextAnchorLink,
+// *RichTextReference, *RichTextReferenceLink and *Unknown.
 type RichText interface{ richText() }
 
 // RichTextString is plain text in a RichText.
@@ -144,6 +144,7 @@ func (*RichTextUrl) richText()                    {}
 func (*RichTextEmailAddress) richText()           {}
 func (*RichTextPhoneNumber) richText()            {}
 func (*RichTextBankCardNumber) richText()         {}
+func (*RichTextTonAddress) richText()             {}
 func (*RichTextMention) richText()                {}
 func (*RichTextHashtag) richText()                {}
 func (*RichTextCashtag) richText()                {}
@@ -225,6 +226,8 @@ func decodeRichTextObject(data []byte) (RichText, error) {
 		v = new(RichTextPhoneNumber)
 	case "bank_card_number":
 		v = new(RichTextBankCardNumber)
+	case "ton_address":
+		v = new(RichTextTonAddress)
 	case "mention":
 		v = new(RichTextMention)
 	case "hashtag":
@@ -778,6 +781,41 @@ func (v RichTextBankCardNumber) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
 func (v *RichTextBankCardNumber) UnmarshalJSON(data []byte) error {
 	type fields RichTextBankCardNumber
+	var raw struct {
+		*fields
+		Text json.RawMessage `json:"text"`
+	}
+	raw.fields = (*fields)(v)
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	var err error
+	if v.Text, err = decodeRichText(raw.Text); err != nil {
+		return err
+	}
+	return nil
+}
+
+// An address in the TON blockchain.
+type RichTextTonAddress struct {
+	// Text of the address
+	Text RichText `json:"text"`
+	// The address
+	Address string `json:"address"`
+}
+
+// MarshalJSON encodes v with "type" set to "ton_address".
+func (v RichTextTonAddress) MarshalJSON() ([]byte, error) {
+	type fields RichTextTonAddress
+	return json.Marshal(struct {
+		Type string `json:"type"`
+		fields
+	}{"ton_address", fields(v)})
+}
+
+// UnmarshalJSON decodes v, choosing the concrete type of each field that can hold several types.
+func (v *RichTextTonAddress) UnmarshalJSON(data []byte) error {
+	type fields RichTextTonAddress
 	var raw struct {
 		*fields
 		Text json.RawMessage `json:"text"`

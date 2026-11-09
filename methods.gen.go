@@ -215,6 +215,30 @@ func (c *Client) SendVideoNote(ctx context.Context, params SendVideoNoteParams) 
 	return &result, nil
 }
 
+// Use this method to send a message with an HTML widget.
+func (c *Client) SendWidget(ctx context.Context, params SendWidgetParams) (*models.Message, error) {
+	if c.defaults != nil {
+		params.applyDefaults(c.defaults)
+	}
+	var result models.Message
+	if err := c.Call(ctx, "sendWidget", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Use this method to send again a shared widget created by the bot.
+func (c *Client) SendSharedWidget(ctx context.Context, params SendSharedWidgetParams) (*models.Message, error) {
+	if c.defaults != nil {
+		params.applyDefaults(c.defaults)
+	}
+	var result models.Message
+	if err := c.Call(ctx, "sendSharedWidget", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // Use this method to send paid media.
 func (c *Client) SendPaidMedia(ctx context.Context, params SendPaidMediaParams) (*models.Message, error) {
 	if c.defaults != nil {
@@ -562,6 +586,16 @@ func (c *Client) GetChatMember(ctx context.Context, params GetChatMemberParams) 
 	return decodeUnion("getChatMember", raw, models.DecodeChatMember)
 }
 
+// Use this method to get the list of backdrops, which can be used as the background of a theme of
+// the screen for sharing a link to a user or a chat.
+func (c *Client) GetChatShareThemeBackdrops(ctx context.Context) (*models.ChatShareThemeBackdrops, error) {
+	var result models.ChatShareThemeBackdrops
+	if err := c.Call(ctx, "getChatShareThemeBackdrops", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // Use this method to get the last messages from the personal chat (i.e., the chat currently added
 // to their profile) of a given user.
 func (c *Client) GetUserPersonalChatMessages(ctx context.Context, params GetUserPersonalChatMessagesParams) ([]models.Message, error) {
@@ -662,6 +696,11 @@ func (c *Client) UnpinAllGeneralForumTopicMessages(ctx context.Context, params U
 // Use this method to send answers to callback queries sent from inline keyboards.
 func (c *Client) AnswerCallbackQuery(ctx context.Context, params AnswerCallbackQueryParams) error {
 	return c.Call(ctx, "answerCallbackQuery", params, nil)
+}
+
+// Use this method to send an answer to a query from a widget.
+func (c *Client) AnswerWidgetQuery(ctx context.Context, params AnswerWidgetQueryParams) error {
+	return c.Call(ctx, "answerWidgetQuery", params, nil)
 }
 
 // Use this method to reply to a received guest message.
@@ -949,6 +988,15 @@ func (c *Client) GetChatGifts(ctx context.Context, params GetChatGiftsParams) (*
 	return &result, nil
 }
 
+// Use this method to get information about a unique gift by its name.
+func (c *Client) GetUniqueGift(ctx context.Context, params GetUniqueGiftParams) (*models.UniqueGift, error) {
+	var result models.UniqueGift
+	if err := c.Call(ctx, "getUniqueGift", params, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 // Converts a given regular gift to Telegram Stars.
 func (c *Client) ConvertGiftToStars(ctx context.Context, params ConvertGiftToStarsParams) error {
 	return c.Call(ctx, "convertGiftToStars", params, nil)
@@ -962,6 +1010,12 @@ func (c *Client) UpgradeGift(ctx context.Context, params UpgradeGiftParams) erro
 // Transfers an owned unique gift to another user.
 func (c *Client) TransferGift(ctx context.Context, params TransferGiftParams) error {
 	return c.Call(ctx, "transferGift", params, nil)
+}
+
+// Deletes a regular gift owned by a managed business account without receiving Telegram Stars for
+// it.
+func (c *Client) DeleteBusinessAccountGift(ctx context.Context, params DeleteBusinessAccountGiftParams) error {
+	return c.Call(ctx, "deleteBusinessAccountGift", params, nil)
 }
 
 // Posts a story on behalf of a managed business account.
@@ -1097,6 +1151,17 @@ func (c *Client) EditMessageChecklist(ctx context.Context, params EditMessageChe
 		return nil, err
 	}
 	return &result, nil
+}
+
+// Use this method to edit data of a widget in a message sent by the bot or via the bot (for inline
+// bots).
+func (c *Client) EditMessageWidgetData(ctx context.Context, params EditMessageWidgetDataParams) error {
+	return c.Call(ctx, "editMessageWidgetData", params, nil)
+}
+
+// Use this method to edit public data of a shared widget created by the bot.
+func (c *Client) EditSharedWidgetData(ctx context.Context, params EditSharedWidgetDataParams) error {
+	return c.Call(ctx, "editSharedWidgetData", params, nil)
 }
 
 // Use this method to edit only the reply markup of messages. The Message is nil when the Bot API

@@ -35,6 +35,10 @@ type Update struct {
 	ChosenInlineResult *ChosenInlineResult `json:"chosen_inline_result,omitempty"`
 	// New incoming callback query
 	CallbackQuery *CallbackQuery `json:"callback_query,omitempty"`
+	// New incoming query from a widget in a message sent by the bot or via the bot
+	WidgetQuery *WidgetQuery `json:"widget_query,omitempty"`
+	// New incoming query from a forwarded message with a shared widget
+	SharedWidgetQuery *SharedWidgetQuery `json:"shared_widget_query,omitempty"`
 	// New incoming shipping query.
 	ShippingQuery *ShippingQuery `json:"shipping_query,omitempty"`
 	// New incoming pre-checkout query.
